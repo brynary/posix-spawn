@@ -170,7 +170,7 @@ module POSIX
         t = timeout
         while readers.any? || writers.any?
           ready = IO.select(readers, writers, readers + writers, t)
-          raise TimeoutExceeded if ready.nil?
+          raise TimeoutExceeded.new(out, err) if ready.nil?
 
           # write to stdin stream
           ready[1].each do |fd|
@@ -203,7 +203,7 @@ module POSIX
           @runtime = Time.now - start
           if timeout
             t = timeout - @runtime
-            raise TimeoutExceeded if t < 0.0
+            raise TimeoutExceeded.new(out, err) if t < 0.0
           end
 
           # maybe we've hit our max output

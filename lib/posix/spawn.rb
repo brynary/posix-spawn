@@ -323,6 +323,14 @@ module POSIX
 
     # Exception raised when timeout is exceeded.
     class TimeoutExceeded < StandardError
+      attr_reader :stdout
+      attr_reader :stderr
+
+      def initialize(stdout = nil, stderr = nil)
+        super()
+        @stdout = stdout
+        @stderr = stderr
+      end
     end
 
     private
