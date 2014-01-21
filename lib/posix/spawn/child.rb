@@ -92,6 +92,8 @@ module POSIX
       # Total command execution time (wall-clock time)
       attr_reader :runtime
 
+      attr_reader :pid
+
       # Determine if the process did exit with a zero exit status.
       def success?
         @status && @status.success?
@@ -102,18 +104,18 @@ module POSIX
       # immediately when a new instance of this object is initialized.
       def exec!
         # spawn the process and hook up the pipes
-        pid, stdin, stdout, stderr = popen4(@env, *(@argv + [@options]))
+        @pid, stdin, stdout, stderr = popen4(@env, *(@argv + [@options]))
 
         # async read from all streams into buffers
         @out, @err = read_and_write(@input, stdin, stdout, stderr, @timeout, @max)
 
         # grab exit status
-        @status = waitpid(pid)
+        @status = waitpid(@pid)
       rescue Object => boom
         [stdin, stdout, stderr].each { |fd| fd.close rescue nil }
         if @status.nil?
-          ::Process.kill('TERM', pid) rescue nil
-          @status = waitpid(pid)      rescue nil
+          ::Process.kill('TERM', @pid) rescue nil
+          @status = waitpid(@pid)      rescue nil
         end
         raise
       ensure
