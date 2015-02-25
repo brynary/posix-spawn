@@ -77,7 +77,7 @@ module POSIX
         @timeout = @options.delete(:timeout)
         @max = @options.delete(:max)
         @options.delete(:chdir) if @options[:chdir].nil?
-        exec!
+        exec! if !@options.delete(:noexec)
       end
 
       # All data written to the child process's stdout stream as a String.
@@ -99,7 +99,6 @@ module POSIX
         @status && @status.success?
       end
 
-    private
       # Execute command, write input, and read output. This is called
       # immediately when a new instance of this object is initialized.
       def exec!
@@ -122,6 +121,8 @@ module POSIX
         # let's be absolutely certain these are closed
         [stdin, stdout, stderr].each { |fd| fd.close rescue nil }
       end
+
+    private
 
       # Maximum buffer size for reading
       BUFSIZE = (32 * 1024)
